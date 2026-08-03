@@ -12,7 +12,13 @@ The GA36-MB v1.2 (and likely v1.0 and v1.1) use the ancient Sunxi U-boot bootloa
 
 The first ~100 or so mb of the SD card contain important data the bootloader needs, and the bootloader itself, so we'll avoid that space. To be extra cautious, we'll bump that up to 128mb, and only use the space after that.
 
-0. Install Docker
+0. Install Docker and the extras needed to build the armv7 rootfs stage. On Debian/Ubuntu:
+
+   `
+   sudo apt install docker.io docker-buildx qemu-user-static binfmt-support
+   `
+
+   Then ensure your user can talk to the daemon (`sudo usermod -aG docker $USER` and re-login, or prefix docker commands with `sudo`).
 1. Make an image of the stock SD card. Put it somewhere very safe. We'll refer to this as `original_sdcard.img`.
 2. Put a new microSD card (at least 1gb, doesn't need to be empty, but all data on the disk will be lost) into your computer. Use `lsblk` to identify it's location. This will be referred to as `/dev/sdX` or `Debian SD Card`. Anywhere you see `/dev/sdX` should be replaced with this actual device path.
 3. Let's construct an MBR on the disk: `sudo parted /dev/sdX mklabel msdos`
@@ -26,7 +32,7 @@ The first ~100 or so mb of the SD card contain important data the bootloader nee
 11. And extract the rootfs to that location: `sudo tar -xf debian-a33-rootfs.tar.gz -C /mnt/ga36mb_linux/`
 12. Now run `sync` to force your OS to actually write all the data to the microSD card. It'll likely take a while.
 13. Then unmount it with `sudo umount /mnt/ga36mb_linux`
-14. Now unplug the microSD card and pop it into your device. If everything went well, it'll boot into debian linux.
+14. Now unplug the microSD card and pop it into your device. If everything went well, it'll boot into debian linux. Default login is root / root.
 
 ## What's working so far?
 - A .dts file has been created which boots the device (and keeps it booted), powers some of the important subsystems, and gets UART and the screen working. This .dts is not complete and needs a lot more work. **NOTE**: If you're unfamiliar with linux device tree, please be very careful. Careless edits could permanently destroy components on your device.
