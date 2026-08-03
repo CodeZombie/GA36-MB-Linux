@@ -124,6 +124,7 @@
         reg = <0x3a3>;
         interrupt-parent = <&r_intc>;
         interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_LOW>;
+        x-powers,drive-vbus-en;	/* fex: usb_drv_vbus_gpio = power4 (PMIC drives VBUS) */
     };
 };
 
@@ -192,4 +193,29 @@
 &reg_dc5ldo {
     regulator-always-on;
     regulator-name = "vdd-cpus-dc5ldo";
+};
+
+/* USB OTG port in host mode, per fex [usbc0] */
+&reg_drivevbus {
+    regulator-name = "usb0-vbus";
+    status = "okay";
+};
+
+&usb_otg {
+    dr_mode = "host";
+    status = "okay";
+};
+
+&usbphy {
+    usb0_id_det-gpios = <&pio 7 8 GPIO_ACTIVE_HIGH>;	/* fex: usb_id_gpio = PH08 */
+    usb0_vbus-supply = <&reg_drivevbus>;
+    status = "okay";
+};
+
+&ehci0 {
+    status = "okay";
+};
+
+&ohci0 {
+    status = "okay";
 };

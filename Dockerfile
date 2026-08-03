@@ -73,6 +73,23 @@ RUN ./scripts/config --enable CONFIG_ARM_APPENDED_DTB && \
     ./scripts/config --enable CONFIG_FRAMEBUFFER_CONSOLE && \
     ./scripts/config --enable CONFIG_FB && \
     ./scripts/config --enable CONFIG_DRM_LIMA && \
+    ./scripts/config --enable CONFIG_USB && \
+    ./scripts/config --enable CONFIG_USB_EHCI_HCD && \
+    ./scripts/config --enable CONFIG_USB_EHCI_HCD_PLATFORM && \
+    ./scripts/config --enable CONFIG_USB_OHCI_HCD && \
+    ./scripts/config --enable CONFIG_USB_OHCI_HCD_PLATFORM && \
+    ./scripts/config --enable CONFIG_USB_MUSB_HDRC && \
+    ./scripts/config --enable CONFIG_USB_MUSB_SUNXI && \
+    ./scripts/config --enable CONFIG_USB_MUSB_DUAL_ROLE && \
+    ./scripts/config --enable CONFIG_PHY_SUN4I_USB && \
+    ./scripts/config --enable CONFIG_USB_NET_DRIVERS && \
+    ./scripts/config --enable CONFIG_USB_USBNET && \
+    ./scripts/config --enable CONFIG_USB_NET_CDCETHER && \
+    ./scripts/config --enable CONFIG_USB_NET_CDC_NCM && \
+    ./scripts/config --enable CONFIG_USB_NET_CDC_SUBSET && \
+    ./scripts/config --enable CONFIG_USB_RTL8152 && \
+    ./scripts/config --enable CONFIG_USB_NET_AX88179_178A && \
+    ./scripts/config --enable CONFIG_USB_ANNOUNCE_NEW_DEVICES && \
     make olddefconfig
 
 # Build kernel and DTBs
@@ -108,7 +125,8 @@ FROM --platform=linux/arm/v7 debian:trixie-slim AS rootfs_builder
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    systemd systemd-sysv udev dbus netbase iproute2 iputils-ping \
+    systemd systemd-sysv systemd-resolved systemd-timesyncd \
+    udev dbus netbase iproute2 iputils-ping \
     kmod nano openssh-server busybox libdrm-tests glmark2-es2-drm libegl1 libgles2 libglx-mesa0 \
     && rm -rf /var/lib/apt/lists/*
 
@@ -116,6 +134,15 @@ RUN echo "root:root" | chpasswd
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN echo "/dev/mmcblk0p1 / ext4 defaults 0 1" > /etc/fstab
 RUN rm -f /usr/sbin/policy-rc.d
+
+# Networking: networkd DHCPs on wired/USB ethernet, resolved provides DNS,
+# timesyncd sets the clock (apt refuses repo signatures if the date is wrong).
+COPY rootfs/etc/systemd/network/20-wired.network /etc/systemd/network/20-wired.network
+RUN systemctl enable systemd-networkd systemd-resolved systemd-timesyncd
+
+# /etc/resolv.conf must point at systemd-resolved, but Docker bind-mounts that
+# path during the build, so stage the symlink separately and add it to the tar.
+RUN mkdir -p /staging/etc && ln -s /usr/lib/systemd/resolv.conf /staging/etc/resolv.conf
 
 # Package the filesystem.
 RUN tar --numeric-owner -cpzf /debian-a33-rootfs.tar.gz \
@@ -125,7 +152,10 @@ RUN tar --numeric-owner -cpzf /debian-a33-rootfs.tar.gz \
     --exclude=/dev/* \
     --exclude=/run/* \
     --exclude=/.dockerenv \
-    /
+    --exclude=/staging \
+    --exclude=/etc/resolv.conf \
+    / \
+    -C /staging etc/resolv.conf
 
 # ==========================================
 # Stage 3: Export Artifacts
