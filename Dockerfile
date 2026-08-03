@@ -46,7 +46,7 @@ RUN ./scripts/config --enable CONFIG_ARM_APPENDED_DTB && \
     ./scripts/config --enable CONFIG_EXT4_FS && \
     ./scripts/config --enable CONFIG_DEVTMPFS && \
     ./scripts/config --enable CONFIG_DEVTMPFS_MOUNT && \
-    ./scripts/config --enable CONFIG_SQUASHFS && \
+    ./scripts/config --enable CONFIG_GPIO_SYSFS && \
     ./scripts/config --enable CONFIG_VFP && \
     ./scripts/config --enable CONFIG_VFPv4 && \
     ./scripts/config --enable CONFIG_NEON && \
@@ -72,6 +72,7 @@ RUN ./scripts/config --enable CONFIG_ARM_APPENDED_DTB && \
     ./scripts/config --enable CONFIG_DRM_FBDEV_EMULATION && \
     ./scripts/config --enable CONFIG_FRAMEBUFFER_CONSOLE && \
     ./scripts/config --enable CONFIG_FB && \
+    ./scripts/config --enable CONFIG_DRM_LIMA && \
     make olddefconfig
 
 # Build kernel and DTBs
@@ -81,7 +82,7 @@ RUN make -j$(nproc) zImage dtbs
 RUN cat arch/arm/boot/zImage arch/arm/boot/dts/allwinner/sun8i-a33-ga36mb-v12.dtb > arch/arm/boot/zImage_with_dtb
 
 # Build an android boot image with the kernel
-# The bootloader requires that 0x40000000 offset. 
+# The bootloader requires that 0x40000000 offset.
 # If we manage to rebuild the bootloader with modern U-Boot, we can probably get rid of that.
 RUN touch empty_ramdisk
 RUN mkbootimg \
@@ -95,10 +96,10 @@ RUN mkbootimg \
 
 # ==========================================================================================================================
 # Stage 2: RootFS
-# 
+#
 # This is a major hack: We're just pulling an armv7 build of trixie from docker hub and packaging that up into a tar.gz.
 # In the future, we need to use Buildroot to compile the entire rootfs with the appropriate SoC-specific flags (Neon, etc).
-# This, however, is very convenient. If we put package names in the `apt-get install` line, they automatically get 
+# This, however, is very convenient. If we put package names in the `apt-get install` line, they automatically get
 # put in our output rootfs and we can run them on the device. It also doesn't need to compile anything, so it's _fast_.
 # ==========================================================================================================================
 
@@ -108,7 +109,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     systemd systemd-sysv udev dbus netbase iproute2 iputils-ping \
-    kmod nano openssh-server busybox libdrm-tests \
+    kmod nano openssh-server busybox libdrm-tests glmark2-es2-drm libegl1 libgles2 libglx-mesa0 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN echo "root:root" | chpasswd

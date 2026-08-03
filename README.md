@@ -32,14 +32,18 @@ The first ~100 or so mb of the SD card contain important data the bootloader nee
 - A .dts file has been created which boots the device (and keeps it booted), powers some of the important subsystems, and gets UART and the screen working. This .dts is not complete and needs a lot more work. **NOTE**: If you're unfamiliar with linux device tree, please be very careful. Careless edits could permanently destroy components on your device.
 - The display driver's init sequence has been reverse-engineered and re-implemented for Linux 6.12.
 - With a 2gb linux partition I was able to get it to launch Retroarch. Though I couldn't do much because the buttons don't work yet :)
+- GPU/Hardware Acceleration
 
 ## What still needs to be done?
 - Buttons (except the power button - pressing that immediately triggers a `shutdown`)
 - Joysticks
-- USB
-- Audio
-- GPU (the correct regulator needs to be identified and applied in the .dts)
-- Battery management
+- USB OTG 5v Out (if possible)
+- USB Serial (if possible)
+- USB Mass Storage Device (if possible)
+- Second MicroSD card slot
+- Audio/Headset detection
+- LED management
+- Power/Battery management
 - Voltage ranges in the .dts haven't been validated.
 - The `regulator-always-on` nodes in the dts should be checked. We probably don't want all of them to be always-on, but it keeps the kernel from killing power to important subsystems that have already been initialized by the bootloader.
 - Probably everything else
