@@ -115,7 +115,62 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN echo "root:root" | chpasswd
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN echo "/dev/mmcblk0p1 / ext4 defaults 0 1" > /etc/fstab
+
+# Mount volatile directories to RAM to avoid wearing out the SD card
+RUN cat <<'EOF' >> /etc/fstab
+tmpfs /tmp     tmpfs defaults,noatime,mode=1777,size=64M 0 0
+tmpfs /var/tmp tmpfs defaults,noatime,mode=1777,size=32M  0 0
+tmpfs /var/log tmpfs defaults,noatime,mode=0755,size=32M  0 0
+EOF
+
+# Since /var/log is now tmpfs, tell journald not to try to persist logs elsewhere or preallocate large files (also silences the "volatile" warning)
+RUN mkdir -p /etc/systemd/journald.conf.d && \
+    printf '[Journal]\nStorage=volatile\nRuntimeMaxUse=16M\n' \
+    > /etc/systemd/journald.conf.d/volatile.conf
+
 RUN rm -f /usr/sbin/policy-rc.d
+
+
+## COMPILE AND INSTALL PEGASUS --------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates git build-essential cmake pkg-config \
+    qtbase5-dev qtbase5-dev-tools \
+    qtdeclarative5-dev qtdeclarative5-dev-tools \
+    qtmultimedia5-dev libqt5svg5-dev \
+    qml-module-qtquick2 qml-module-qtquick-controls2 \
+    qml-module-qtquick-layouts qml-module-qtgraphicaleffects \
+    qml-module-qtmultimedia \
+    libsdl2-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN update-ca-certificates
+
+RUN git clone --recursive https://github.com/mmatyas/pegasus-frontend /usr/src/pegasus-frontend
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    qttools5-dev qttools5-dev-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+# Cortex-A7 (A33) tuning: NEON + VFPv4, hard-float ABI
+ENV PEGASUS_CFLAGS="-mcpu=cortex-a7 -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -O2"
+
+RUN mkdir -p /usr/src/pegasus-frontend/build && \
+    cd /usr/src/pegasus-frontend/build && \
+    cmake .. \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX=/usr \
+      -DPEGASUS_USE_SDL2_GAMEPAD=ON \
+      -DCMAKE_C_FLAGS="${PEGASUS_CFLAGS}" \
+      -DCMAKE_CXX_FLAGS="${PEGASUS_CFLAGS}" && \
+    make -j$(nproc) && \
+    make install
+
+# Sanity check the install actually produced a binary on PATH
+RUN command -v pegasus-fe || \
+    (echo "ERROR: pegasus-fe not found after install" >&2 && \
+     find /usr/src/pegasus-frontend/build -maxdepth 2 -type f -executable && exit 1)
+
+RUN rm -rf /usr/src/pegasus-frontend
+# --------
 
 # Package the filesystem.
 RUN tar --numeric-owner -cpzf /debian-a33-rootfs.tar.gz \
