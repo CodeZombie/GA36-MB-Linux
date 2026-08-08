@@ -90,6 +90,11 @@ RUN ./scripts/config --enable CONFIG_ARM_APPENDED_DTB && \
     ./scripts/config --enable CONFIG_USB_RTL8152 && \
     ./scripts/config --enable CONFIG_USB_NET_AX88179_178A && \
     ./scripts/config --enable CONFIG_USB_ANNOUNCE_NEW_DEVICES && \
+    ./scripts/config --enable CONFIG_USB_G_SERIAL && \
+    ./scripts/config --enable CONFIG_INPUT_KEYBOARD && \
+    ./scripts/config --enable CONFIG_KEYBOARD_GPIO && \
+    ./scripts/config --enable CONFIG_KEYBOARD_GPIO_POLLED && \
+    ./scripts/config --enable CONFIG_INPUT_JOYDEV && \
     make olddefconfig
 
 # Build kernel and DTBs
@@ -143,6 +148,24 @@ RUN systemctl enable systemd-networkd systemd-resolved systemd-timesyncd
 # /etc/resolv.conf must point at systemd-resolved, but Docker bind-mounts that
 # path during the build, so stage the symlink separately and add it to the tar.
 RUN mkdir -p /staging/etc && ln -s /usr/lib/systemd/resolv.conf /staging/etc/resolv.conf
+
+# -------------------------------------------------------------------
+# Enable USB OTG Serial Root Shell
+# -------------------------------------------------------------------
+# 1. Auto-load the g_serial kernel module on boot
+RUN echo "g_serial" > /etc/modules-load.d/usb-serial-gadget.conf
+
+# 2. Create the systemd drop-in override for auto-login on ttyGS0
+RUN mkdir -p /etc/systemd/system/serial-getty@ttyGS0.service.d && \
+    echo "[Service]" > /etc/systemd/system/serial-getty@ttyGS0.service.d/override.conf && \
+    echo "ExecStart=" >> /etc/systemd/system/serial-getty@ttyGS0.service.d/override.conf && \
+    echo "ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --autologin root %I \$TERM" >> /etc/systemd/system/serial-getty@ttyGS0.service.d/override.conf
+
+# 3. Manually enable the service by creating the systemd "wants" symlink
+RUN mkdir -p /etc/systemd/system/getty.target.wants && \
+    ln -sf /lib/systemd/system/serial-getty@.service /etc/systemd/system/getty.target.wants/serial-getty@ttyGS0.service
+# -------
+
 
 # Package the filesystem.
 RUN tar --numeric-owner -cpzf /debian-a33-rootfs.tar.gz \
