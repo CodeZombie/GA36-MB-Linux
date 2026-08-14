@@ -56,7 +56,6 @@ RUN ./scripts/config --enable CONFIG_ARM_APPENDED_DTB && \
     ./scripts/config --enable CONFIG_PREEMPT && \
     ./scripts/config --enable CONFIG_CPU_FREQ && \
     ./scripts/config --enable CONFIG_CPU_FREQ_DEFAULT_GOV_ONDEMAND && \
-    ./scripts/config --enable CONFIG_SUN8I_THERMAL && \
     ./scripts/config --enable CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE && \
     ./scripts/config --enable CONFIG_MFD_AXP20X_RSB && \
     ./scripts/config --enable CONFIG_REGULATOR_AXP20X && \
@@ -95,7 +94,21 @@ RUN ./scripts/config --enable CONFIG_ARM_APPENDED_DTB && \
     ./scripts/config --enable CONFIG_KEYBOARD_GPIO && \
     ./scripts/config --enable CONFIG_KEYBOARD_GPIO_POLLED && \
     ./scripts/config --enable CONFIG_INPUT_JOYDEV && \
+    ./scripts/config --enable CONFIG_SWAP && \
+    ./scripts/config --enable CONFIG_ZSMALLOC && \
+    ./scripts/config --enable CONFIG_ZRAM && \
+    ./scripts/config --enable CONFIG_CRYPTO_LZ4 && \
+    ./scripts/config --enable CONFIG_CRYPTO_ZSTD && \
+    ./scripts/config --enable CONFIG_CRYPTO_LZO && \
+    ./scripts/config --enable CONFIG_THERMAL && \
+    ./scripts/config --enable CONFIG_CPU_THERMAL && \
+    ./scripts/config --enable CONFIG_THERMAL_GOV_STEP_WISE && \
+    ./scripts/config --enable CONFIG_IIO && \
+    ./scripts/config --enable CONFIG_MFD_SUN4I_GPADC && \
+    ./scripts/config --enable CONFIG_SUN4I_GPADC && \
     make olddefconfig
+
+# TODO: Do we need `CONFIG_SUN8I_THERMAL`? The kernel seems to be able to read cpu temps without it.
 
 # Build kernel and DTBs
 RUN make -j$(nproc) zImage dtbs
