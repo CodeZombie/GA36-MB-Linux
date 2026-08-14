@@ -1,11 +1,14 @@
 /dts-v1/;
 #include "sun8i-a33.dtsi"
+#include <dt-bindings/input/linux-event-codes.h>
 #include <dt-bindings/gpio/gpio.h>
+
 
 / {
     model = "Unknown A33 Handheld";
     compatible = "vendor,unknown-a33-handheld",
     "allwinner,sun8i-a33";
+    
     aliases {
         /* Map ttyS0 to UART1 and ttyS1 to UART2 */
         serial0 = &uart1;
@@ -20,7 +23,7 @@
     };
     memory@40000000 {
         device_type = "memory";
-        reg = <0x40000000 0x20000000>; /* FIXME */
+        reg = <0x40000000 0x20000000>; /* VERIFY */
     };
     backlight: backlight {
         compatible = "pwm-backlight";
@@ -29,6 +32,116 @@
         default-brightness-level = <5>;	/* fex: lcd0_bright = 50 */
         power-supply = <&reg_dc1sw>;	/* fex: lcd_power = axp22_dc1sw */
     };
+
+    gpio_gamepad: gpio-keys-polled {
+        compatible = "gpio-keys-polled";
+        poll-interval = <16>; /* in ms */
+        autorepeat;
+
+        button_up {
+            label = "D-Pad Up";
+            linux,code = <BTN_DPAD_UP>;
+            gpios = <&pio 4 9 GPIO_ACTIVE_LOW>;
+        };
+
+        button_down {
+            label = "D-Pad Down";
+            linux,code = <BTN_DPAD_DOWN>;
+            gpios = <&pio 4 8 GPIO_ACTIVE_LOW>;
+        };
+
+        button_left {
+            label = "D-Pad Left";
+            linux,code = <BTN_DPAD_LEFT>;
+            gpios = <&pio 4 7 GPIO_ACTIVE_LOW>;
+        };
+
+        button_right {
+            label = "D-Pad Right";
+            linux,code = <BTN_DPAD_RIGHT>;
+            gpios = <&pio 4 6 GPIO_ACTIVE_LOW>;
+        };
+
+        button_a {
+            label = "A Button";
+            linux,code = <BTN_A>;
+            gpios = <&pio 4 13 GPIO_ACTIVE_LOW>; // This may actually be `4 12` - TODO: Confirm
+        };
+
+        button_b {
+            label = "B Button";
+            linux,code = <BTN_B>;
+            gpios = <&pio 4 12 GPIO_ACTIVE_LOW>; // This may actually be `4 13` - TODO: Confirm
+        };
+
+        button_x {
+            label = "X Button";
+            linux,code = <BTN_X>;
+            gpios = <&pio 4 11 GPIO_ACTIVE_LOW>;
+        };
+
+        button_y {
+            label = "Y Button";
+            linux,code = <BTN_Y>;
+            gpios = <&pio 4 10 GPIO_ACTIVE_LOW>;
+        };
+
+        button_rb {
+            label = "Right Bumper Button";
+            linux,code = <BTN_TR>;
+            gpios = <&pio 4 17 GPIO_ACTIVE_LOW>;
+        };
+
+        button_rt {
+            label = "Right Trigger Button";
+            linux,code = <BTN_TR2>;
+            gpios = <&pio 4 16 GPIO_ACTIVE_LOW>;
+        };
+
+        button_lb {
+            label = "Left Bumper Button";
+            linux,code = <BTN_TL>;
+            gpios = <&pio 4 15 GPIO_ACTIVE_LOW>;
+        };
+
+        button_lt {
+            label = "Left Trigger Button";
+            linux,code = <BTN_TL2>;
+            gpios = <&pio 4 14 GPIO_ACTIVE_LOW>;
+        };
+        
+        button_thumbr {
+            label = "Right Thumb Button";
+            linux,code = <BTN_THUMBR>;
+            gpios = <&pio 1 2 GPIO_ACTIVE_LOW>;
+        };
+
+        button_thumbl {
+            label = "Left Thumb Button";
+            linux,code = <BTN_THUMBL>;
+            gpios = <&pio 1 3 GPIO_ACTIVE_LOW>;
+        };
+
+        button_start {
+            label = "Start Button";
+            linux,code = <BTN_START>;
+            gpios = <&pio 4 4 GPIO_ACTIVE_LOW>;
+        };
+
+        button_select {
+            label = "Select Button";
+            linux,code = <BTN_SELECT>;
+            gpios = <&pio 4 5 GPIO_ACTIVE_LOW>;
+        };
+
+        button_fn {
+            label = "FN Button";
+            linux,code = <BTN_MODE>;
+            gpios = <&pio 4 1 GPIO_ACTIVE_LOW>;
+        };
+
+    };
+
 };
 
 &pwm {
@@ -127,6 +240,28 @@
     };
 };
 
+&cpu0 {
+    cpu-supply = <&reg_dcdc3>;
+    #cooling-cells = <2>;
+};
+
+
+// The base sun8i-a33.dtsi's opp table only goes up to 1.008ghz.
+// The CPU can safely scale up to 1.5ghz, but for stability (and thermal) reasons, we're just going to let it go up to 1.2 for now.
+// TODO: stress test the cpu with passive cooling at 1.5ghz.
+&cpu0_opp_table {
+    opp-1104000000 {
+        opp-hz = /bits/ 64 <1104000000>;
+        opp-microvolt = <1320000>;
+        clock-latency-ns = <244144>;
+    };
+    opp-1200000000 {
+        opp-hz = /bits/ 64 <1200000000>;
+        opp-microvolt = <1320000>;
+        clock-latency-ns = <244144>;
+    };
+};
+
 #include "axp223.dtsi"
 
 &reg_aldo2 {
@@ -152,18 +287,19 @@
 
 &reg_dcdc2 {
     regulator-always-on;
-    /* I think these ranges can be expanded. */
+    regulator-min-microvolt = <1100000>;
+    regulator-max-microvolt = <1100000>;
+    regulator-name = "vdd-sys";
+};
+
+
+&reg_dcdc3 {
+    regulator-always-on;
     regulator-min-microvolt = <1040000>;
     regulator-max-microvolt = <1320000>;
     regulator-name = "vdd-cpu";
 };
 
-&reg_dcdc3 {
-    regulator-always-on;
-    regulator-min-microvolt = <1200000>;
-    regulator-max-microvolt = <1200000>;
-    regulator-name = "vdd-sys";
-};
 
 &reg_dcdc5 {
     regulator-always-on;
@@ -192,4 +328,29 @@
 &reg_dc5ldo {
     regulator-always-on;
     regulator-name = "vdd-cpus-dc5ldo";
+};
+
+/* USB OTG port in host mode, per fex [usbc0] */
+&reg_drivevbus {
+    regulator-name = "usb0-vbus";
+    status = "okay";
+};
+
+&usb_otg {
+    dr_mode = "otg";
+    status = "okay";
+};
+
+&usbphy {
+    usb0_id_det-gpios = <&pio 7 8 GPIO_ACTIVE_HIGH>;	/* fex: usb_id_gpio = PH08 */
+    //usb0_vbus_power-supply = <&usb_power_supply>;     //commented out for now because I think this is correct, but it doesn't supply 5v to usb peripherals. PCB problem?
+    status = "okay";
+};
+
+&ehci0 {
+    status = "okay";
+};
+
+&ohci0 {
+    status = "okay";
 };

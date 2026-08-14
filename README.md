@@ -39,11 +39,12 @@ The first ~100 or so mb of the SD card contain important data the bootloader nee
 - The display driver's init sequence has been reverse-engineered and re-implemented for Linux 6.12.
 - With a 2gb linux partition I was able to get it to launch Retroarch. Though I couldn't do much because the buttons don't work yet :)
 - GPU/Hardware Acceleration
+- USB host + USB ethernet (CDC / RTL8152 / AX88179). Plug in a powered USB-C network adapter and the system gets an IP, DNS, and time via DHCP — `apt` and SSH work out of the box. Check with `ip addr` and `resolvectl status`.
 
 ## What still needs to be done?
 - Buttons (except the power button - pressing that immediately triggers a `shutdown`)
 - Joysticks
-- USB OTG 5v Out (if possible)
+- USB OTG 5V out (unverified — use a powered hub/adapter for now)
 - USB Serial (if possible)
 - USB Mass Storage Device (if possible)
 - Second MicroSD card slot
