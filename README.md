@@ -37,7 +37,6 @@ The first ~100 or so mb of the SD card contain important data the bootloader nee
 ## What's working so far?
 - A .dts file has been created which boots the device (and keeps it booted), powers some of the important subsystems, and gets UART and the screen working. This .dts is not complete and needs a lot more work. **NOTE**: If you're unfamiliar with linux device tree, please be very careful. Careless edits could permanently destroy components on your device.
 - The display driver's init sequence has been reverse-engineered and re-implemented for Linux 6.12.
-- With a 2gb linux partition I was able to get it to launch Retroarch. Though I couldn't do much because the buttons don't work yet :)
 - GPU/Hardware Acceleration
 - USB host + USB ethernet (CDC / RTL8152 / AX88179). Plug in a powered USB-C network adapter and the system gets an IP, DNS, and time via DHCP — `apt` and SSH work out of the box. Check with `ip addr` and `resolvectl status`.
 - USB Serial. Plug the GA36's otg port into your computer via type-c-to-type-a cable and run `screen /dev/ttyACM* 115200`
