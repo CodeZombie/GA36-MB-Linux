@@ -44,6 +44,8 @@ The first ~100 or so mb of the SD card contain important data the bootloader nee
 - CPU frequency/voltage scaling
 - Thermals
 - Zram
+- Onboard speaker/audio
+- Battery management
 
 ## What still needs to be done?
 - Power button, volume buttons
@@ -51,9 +53,9 @@ The first ~100 or so mb of the SD card contain important data the bootloader nee
 - USB OTG 5V out (unverified — use a powered hub/adapter for now)
 - USB Mass Storage Device (if possible)
 - Second MicroSD card slot
-- Audio/Headset detection
+- Headset detection
+- Headphone audio out
 - LED management
-- Power/Battery management
 - Voltage ranges in the .dts haven't been validated.
 - The `regulator-always-on` nodes in the dts should be checked. We probably don't want all of them to be always-on, but it keeps the kernel from killing power to important subsystems that have already been initialized by the bootloader.
 - Probably everything else
