@@ -57,8 +57,13 @@ RUN ./scripts/config --enable CONFIG_ARM_APPENDED_DTB && \
     ./scripts/config --enable CONFIG_CPU_FREQ && \
     ./scripts/config --enable CONFIG_CPU_FREQ_DEFAULT_GOV_ONDEMAND && \
     ./scripts/config --enable CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE && \
+    ./scripts/config --enable CONFIG_POWER_SUPPLY && \
+    ./scripts/config --enable CONFIG_SUNXI_RSB && \
+    ./scripts/config --enable CONFIG_MFD_AXP20X && \
     ./scripts/config --enable CONFIG_MFD_AXP20X_RSB && \
+    ./scripts/config --enable CONFIG_AXP20X_POWER && \
     ./scripts/config --enable CONFIG_REGULATOR_AXP20X && \
+    ./scripts/config --enable CONFIG_BATTERY_AXP20X && \
     ./scripts/config --enable CONFIG_DRM_SUN4I && \
     ./scripts/config --enable CONFIG_DRM_PANEL_SIMPLE && \
     ./scripts/config --enable CONFIG_BACKLIGHT_PWM && \
@@ -106,9 +111,15 @@ RUN ./scripts/config --enable CONFIG_ARM_APPENDED_DTB && \
     ./scripts/config --enable CONFIG_IIO && \
     ./scripts/config --enable CONFIG_MFD_SUN4I_GPADC && \
     ./scripts/config --enable CONFIG_SUN4I_GPADC && \
+    ./scripts/config --enable CONFIG_SUN8I_THERMAL && \
+    ./scripts/config --enable CONFIG_SOUND && \
+    ./scripts/config --enable CONFIG_SND && \
+    ./scripts/config --enable CONFIG_SND_SOC && \
+    ./scripts/config --enable CONFIG_SND_SIMPLE_CARD && \
+    ./scripts/config --enable CONFIG_SND_SOC_SIMPLE_AMPLIFIER && \
+    ./scripts/config --enable CONFIG_SND_SUN8I_CODEC_ANALOG && \
     make olddefconfig
 
-# TODO: Do we need `CONFIG_SUN8I_THERMAL`? The kernel seems to be able to read cpu temps without it.
 
 # Build kernel and DTBs
 RUN make -j$(nproc) zImage dtbs

@@ -25,12 +25,23 @@
         device_type = "memory";
         reg = <0x40000000 0x20000000>; /* VERIFY */
     };
+
     backlight: backlight {
         compatible = "pwm-backlight";
         pwms = <&pwm 0 50000 0>; /* fex: lcd_pwm_ch = 0, lcd_pwm_freq = 20000 Hz -> 50000 ns, lcd_pwm_pol = 0 -> non-inverted */
         brightness-levels = <0 10 20 30 40 50 60 70 80 90 100>;
         default-brightness-level = <5>;	/* fex: lcd0_bright = 50 */
         power-supply = <&reg_dc1sw>;	/* fex: lcd_power = axp22_dc1sw */
+    };
+
+    bat: battery {
+        compatible = "simple-battery";
+        charge-full-design-microamp-hours = <3000000>; /* fex: pmu_battery_cap = 3000 */
+        factory-internal-resistance-micro-ohms = <119000>; /* fex: pmu_battery_rdc = 119 */
+        
+        /* Standard lipo battery extrema. I didn't pull this from the fex but every cheap lipo ever has these same values. */
+        voltage-max-design-microvolt = <4200000>; /* 4.2V fully charged */
+        voltage-min-design-microvolt = <3300000>; /* 3.3V safe cutoff */
     };
 
     gpio_gamepad: gpio-keys-polled {
@@ -142,6 +153,44 @@
 
     };
 
+    speaker_amp: audio-amplifier {
+		compatible = "simple-audio-amplifier";
+		enable-gpios = <&pio 7 9 GPIO_ACTIVE_HIGH>; /* PH09 */
+		sound-name-prefix = "Speaker Amp";
+	};
+
+};
+
+&sound {
+	status = "okay";
+	simple-audio-card,name = "GA36mbAudio";
+	
+    simple-audio-card,aux-devs = <&codec_analog>, <&speaker_amp>;
+	
+	simple-audio-card,widgets = 
+		"Speaker", "Speaker",
+		"Headphone", "Headphone Jack";
+	
+	simple-audio-card,routing =
+        "Left DAC", "DACL",
+		"Right DAC", "DACR",
+		"Speaker Amp INL", "HP",
+		"Speaker Amp INR", "HP",
+		"Speaker", "Speaker Amp OUTL",
+		"Speaker", "Speaker Amp OUTR",
+		"Headphone Jack", "HP";
+};
+
+&dai {
+	status = "okay";
+};
+
+&codec {
+	status = "okay";
+};
+
+&codec_analog {
+	status = "okay";
 };
 
 &pwm {
@@ -222,9 +271,6 @@
     pinctrl-0 = <&mmc1_pg_pins>;
     status = "okay";
 };
-&pwm {
-    status = "okay";
-};
 
 &r_rsb_pins {
     bias-pull-up;
@@ -239,6 +285,7 @@
         interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_LOW>;
     };
 };
+
 
 &cpu0 {
     cpu-supply = <&reg_dcdc3>;
@@ -263,6 +310,16 @@
 };
 
 #include "axp223.dtsi"
+
+
+&battery_power_supply {
+    status = "okay";
+    monitored-battery = <&bat>;
+};
+
+&usb_power_supply {
+    status = "okay";
+};
 
 &reg_aldo2 {
     regulator-always-on;
@@ -343,7 +400,7 @@
 
 &usbphy {
     usb0_id_det-gpios = <&pio 7 8 GPIO_ACTIVE_HIGH>;	/* fex: usb_id_gpio = PH08 */
-    //usb0_vbus_power-supply = <&usb_power_supply>;     //commented out for now because I think this is correct, but it doesn't supply 5v to usb peripherals. PCB problem?
+    usb0_vbus_power-supply = <&usb_power_supply>;
     status = "okay";
 };
 
