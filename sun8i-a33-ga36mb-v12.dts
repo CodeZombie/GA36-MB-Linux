@@ -176,14 +176,14 @@
     autorepeat;
 
 	button-200 {
-		label = "Test 200mV";
+		label = "Volume Up Key";
 		linux,code = <115>; /* KEY_VOLUMEUP */
 		channel = <0>;
 		voltage = <200000>;
 	};
 
 	button-400 {
-		label = "Test 400mV";
+		label = "Volume Down Key";
 		linux,code = <114>; /* KEY_VOLUMEDOWN */
 		channel = <0>;
 		voltage = <400000>;
