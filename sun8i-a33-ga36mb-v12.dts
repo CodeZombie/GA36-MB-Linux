@@ -280,6 +280,10 @@
     pinctrl-names = "default";
     pinctrl-0 = <&uart1_pg_pins>;
     status = "okay";
+
+    joystick {
+        compatible = "ga36mb,serial-joysticks";
+    };
 };
 
 &uart2 {
