@@ -159,6 +159,39 @@
 		sound-name-prefix = "Speaker Amp";
 	};
 
+    dummy_vref: dummy-lradc-vref {
+        /* Needed for the `lradc` node to function */
+		compatible = "regulator-fixed";
+		regulator-name = "dummy-lradc-vref";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+	};
+
+};
+
+/* Volume buttons */
+&lradc {
+	vref-supply = <&dummy_vref>;
+	status = "okay";
+    autorepeat;
+
+	button-200 {
+		label = "Volume Up Key";
+		linux,code = <115>; /* KEY_VOLUMEUP */
+		channel = <0>;
+		voltage = <200000>;
+	};
+
+	button-400 {
+		label = "Volume Down Key";
+		linux,code = <114>; /* KEY_VOLUMEDOWN */
+		channel = <0>;
+		voltage = <400000>;
+	};
+};
+
+&ths {
+    status = "okay";
 };
 
 &sound {

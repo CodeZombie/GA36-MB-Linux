@@ -118,6 +118,8 @@ RUN ./scripts/config --enable CONFIG_ARM_APPENDED_DTB && \
     ./scripts/config --enable CONFIG_SND_SIMPLE_CARD && \
     ./scripts/config --enable CONFIG_SND_SOC_SIMPLE_AMPLIFIER && \
     ./scripts/config --enable CONFIG_SND_SUN8I_CODEC_ANALOG && \
+    ./scripts/config --enable CONFIG_KEYBOARD_SUN4I_LRADC && \
+    ./scripts/config --enable CONFIG_REGULATOR_FIXED_VOLTAGE && \
     make olddefconfig
 
 
