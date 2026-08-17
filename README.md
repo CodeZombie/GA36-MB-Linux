@@ -12,7 +12,13 @@ The GA36-MB v1.2 (and likely v1.0 and v1.1) use the ancient Sunxi U-boot bootloa
 
 The first ~100 or so mb of the SD card contain important data the bootloader needs, and the bootloader itself, so we'll avoid that space. To be extra cautious, we'll bump that up to 128mb, and only use the space after that.
 
-0. Install Docker
+0. Install Docker and the extras needed to build the armv7 rootfs stage. On Debian/Ubuntu:
+
+   `
+   sudo apt install docker.io docker-buildx qemu-user-static binfmt-support
+   `
+
+   Then ensure your user can talk to the daemon (`sudo usermod -aG docker $USER` and re-login, or prefix docker commands with `sudo`).
 1. Make an image of the stock SD card. Put it somewhere very safe. We'll refer to this as `original_sdcard.img`.
 2. Put a new microSD card (at least 1gb, doesn't need to be empty, but all data on the disk will be lost) into your computer. Use `lsblk` to identify it's location. This will be referred to as `/dev/sdX` or `Debian SD Card`. Anywhere you see `/dev/sdX` should be replaced with this actual device path.
 3. Let's construct an MBR on the disk: `sudo parted /dev/sdX mklabel msdos`
@@ -26,25 +32,30 @@ The first ~100 or so mb of the SD card contain important data the bootloader nee
 11. And extract the rootfs to that location: `sudo tar -xf debian-a33-rootfs.tar.gz -C /mnt/ga36mb_linux/`
 12. Now run `sync` to force your OS to actually write all the data to the microSD card. It'll likely take a while.
 13. Then unmount it with `sudo umount /mnt/ga36mb_linux`
-14. Now unplug the microSD card and pop it into your device. If everything went well, it'll boot into debian linux.
+14. Now unplug the microSD card and pop it into your device. If everything went well, it'll boot into debian linux. Default login is root / root.
 
 ## What's working so far?
 - A .dts file has been created which boots the device (and keeps it booted), powers some of the important subsystems, and gets UART and the screen working. This .dts is not complete and needs a lot more work. **NOTE**: If you're unfamiliar with linux device tree, please be very careful. Careless edits could permanently destroy components on your device.
 - The display driver's init sequence has been reverse-engineered and re-implemented for Linux 6.12.
-- With a 2gb linux partition I was able to get it to launch Retroarch. Though I couldn't do much because the buttons don't work yet :)
 - GPU/Hardware Acceleration
 - USB host + USB ethernet (CDC / RTL8152 / AX88179). Plug in a powered USB-C network adapter and the system gets an IP, DNS, and time via DHCP — `apt` and SSH work out of the box. Check with `ip addr` and `resolvectl status`.
+- USB Serial. Plug the GA36's otg port into your computer via type-c-to-type-a cable and run `screen /dev/ttyACM* 115200`
+- All buttons
+- CPU frequency/voltage scaling
+- Thermals
+- Zram
+- Onboard speaker/audio
+- Battery management
+- Power button, volume buttons
+- Joysticks
 
 ## What still needs to be done?
-- Buttons (except the power button - pressing that immediately triggers a `shutdown`)
-- Joysticks
 - USB OTG 5V out (unverified — use a powered hub/adapter for now)
-- USB Serial (if possible)
 - USB Mass Storage Device (if possible)
 - Second MicroSD card slot
-- Audio/Headset detection
+- Headset detection
+- Headphone audio out
 - LED management
-- Power/Battery management
 - Voltage ranges in the .dts haven't been validated.
 - The `regulator-always-on` nodes in the dts should be checked. We probably don't want all of them to be always-on, but it keeps the kernel from killing power to important subsystems that have already been initialized by the bootloader.
 - Probably everything else
