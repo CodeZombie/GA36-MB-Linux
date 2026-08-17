@@ -40,16 +40,16 @@ The first ~100 or so mb of the SD card contain important data the bootloader nee
 - GPU/Hardware Acceleration
 - USB host + USB ethernet (CDC / RTL8152 / AX88179). Plug in a powered USB-C network adapter and the system gets an IP, DNS, and time via DHCP — `apt` and SSH work out of the box. Check with `ip addr` and `resolvectl status`.
 - USB Serial. Plug the GA36's otg port into your computer via type-c-to-type-a cable and run `screen /dev/ttyACM* 115200`
-- Most buttons
+- All buttons
 - CPU frequency/voltage scaling
 - Thermals
 - Zram
 - Onboard speaker/audio
 - Battery management
 - Power button, volume buttons
+- Joysticks
 
 ## What still needs to be done?
-- Joysticks
 - USB OTG 5V out (unverified — use a powered hub/adapter for now)
 - USB Mass Storage Device (if possible)
 - Second MicroSD card slot

@@ -34,6 +34,17 @@ config DRM_PANEL_JD9366\n\
 \t  Say Y here if you want to enable support for JD9366 panels.\n\
 ' drivers/gpu/drm/panel/Kconfig
 
+# Serial Joystick
+COPY ga36mb-serial-joysticks.c drivers/input/joystick/ga36mb-serial-joysticks.c
+RUN echo 'obj-$(CONFIG_GA36MB_SERIAL_JOYSTICKS) += ga36mb-serial-joysticks.o' >> drivers/input/joystick/Makefile
+RUN sed -i '/^endif/i \
+config GA36MB_SERIAL_JOYSTICKS\n\
+\ttristate "GA36MB SERIAL JOYSTICKS"\n\
+\tdepends on SERIAL_DEV_BUS\n\
+\thelp\n\
+\t  Say Y here to enable support for the GA36-MB Serial Analog Joysticks.\n\
+' drivers/input/joystick/Kconfig
+
 # Inject the dts file
 COPY sun8i-a33-ga36mb-v12.dts arch/arm/boot/dts/allwinner/
 RUN echo 'dtb-$(CONFIG_MACH_SUN8I) += sun8i-a33-ga36mb-v12.dtb' >> arch/arm/boot/dts/allwinner/Makefile
@@ -120,6 +131,10 @@ RUN ./scripts/config --enable CONFIG_ARM_APPENDED_DTB && \
     ./scripts/config --enable CONFIG_SND_SUN8I_CODEC_ANALOG && \
     ./scripts/config --enable CONFIG_KEYBOARD_SUN4I_LRADC && \
     ./scripts/config --enable CONFIG_REGULATOR_FIXED_VOLTAGE && \
+    ./scripts/config --enable CONFIG_INPUT_JOYSTICK && \
+    ./scripts/config --enable CONFIG_SERIAL_DEV_CTRL_TTYPORT && \
+    ./scripts/config --enable CONFIG_SERIAL_DEV_BUS && \
+    ./scripts/config --enable CONFIG_GA36MB_SERIAL_JOYSTICKS && \
     make olddefconfig
 
 
