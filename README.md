@@ -46,9 +46,9 @@ The first ~100 or so mb of the SD card contain important data the bootloader nee
 - Zram
 - Onboard speaker/audio
 - Battery management
+- Power button, volume buttons
 
 ## What still needs to be done?
-- Power button, volume buttons
 - Joysticks
 - USB OTG 5V out (unverified — use a powered hub/adapter for now)
 - USB Mass Storage Device (if possible)
