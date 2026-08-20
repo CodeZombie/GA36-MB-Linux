@@ -51,6 +51,7 @@ The first ~100 or so mb of the SD card contain important data the bootloader nee
 
 ## What still needs to be done?
 - USB OTG 5V out (unverified — use a powered hub/adapter for now)
+- Unified gamepad driver (retroarch doesn't like that the joysticks and buttons are technically different devices)
 - USB Mass Storage Device (if possible)
 - Second MicroSD card slot
 - Headset detection
