@@ -58,6 +58,9 @@ RUN ./scripts/config --enable CONFIG_ARM_APPENDED_DTB && \
     ./scripts/config --enable CONFIG_DEVTMPFS && \
     ./scripts/config --enable CONFIG_DEVTMPFS_MOUNT && \
     ./scripts/config --enable CONFIG_GPIO_SYSFS && \
+    ./scripts/config --enable CONFIG_NEW_LEDS && \
+    ./scripts/config --enable CONFIG_LEDS_CLASS && \
+    ./scripts/config --enable CONFIG_LEDS_GPIO && \
     ./scripts/config --enable CONFIG_VFP && \
     ./scripts/config --enable CONFIG_VFPv4 && \
     ./scripts/config --enable CONFIG_NEON && \

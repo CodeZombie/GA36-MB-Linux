@@ -56,7 +56,7 @@ The first ~100 or so mb of the SD card contain important data the bootloader nee
 - Second MicroSD card slot
 - Headset detection
 - Headphone audio out
-- LED management
+- LED management (green/red status LEDs work; battery-level behavior not yet)
 - Voltage ranges in the .dts haven't been validated.
 - The `regulator-always-on` nodes in the dts should be checked. We probably don't want all of them to be always-on, but it keeps the kernel from killing power to important subsystems that have already been initialized by the bootloader.
 - Probably everything else

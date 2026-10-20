@@ -2,6 +2,7 @@
 #include "sun8i-a33.dtsi"
 #include <dt-bindings/input/linux-event-codes.h>
 #include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/leds/common.h>
 
 
 / {
@@ -151,6 +152,27 @@
             gpios = <&pio 4 1 GPIO_ACTIVE_LOW>;
         };
 
+    };
+
+    leds {
+        /* Stock udt_battery.sh toggles /sys/class/gpio_sw/PL4 and PG13 (fex [gpio_para] gpio_pin_4 / gpio_pin_5),
+         * both active-high outputs: PL4 on above 20% battery, PG13 on at or below 20%. Colours are inferred from
+         * that logic; colours and polarity verified on hardware. */
+        compatible = "gpio-leds";
+
+        led_green: led-0 {
+            color = <LED_COLOR_ID_GREEN>;
+            function = LED_FUNCTION_STATUS;
+            gpios = <&r_pio 0 4 GPIO_ACTIVE_HIGH>; /* PL4 */
+            default-state = "on";
+        };
+
+        led_red: led-1 {
+            color = <LED_COLOR_ID_RED>;
+            function = LED_FUNCTION_STATUS;
+            gpios = <&pio 6 13 GPIO_ACTIVE_HIGH>; /* PG13 */
+            default-state = "off";
+        };
     };
 
     speaker_amp: audio-amplifier {
